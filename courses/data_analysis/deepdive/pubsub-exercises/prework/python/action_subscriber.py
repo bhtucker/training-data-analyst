@@ -23,11 +23,24 @@ from google.cloud import pubsub_v1
 class ActionSubscriber:
   # Creates a new subscriber associated with the given project and subscription.
   def __init__(self, project, subscription):
+
+    self.subscriber = pubsub_v1.SubscriberClient()
+    # The `subscription_path` method creates a fully qualified identifier
+    # in the form `projects/{project_id}/subscriptions/{subscription_name}`
+    self.subscription_path = self.subscriber.subscription_path(project, subscription)
+    self.view_count = 0
+
+    def callback(message):
+      action = ActionUtils.decode_action_from_json(message)
+      if self.is_view_action(action):
+        self.view_count += 1
+      message.ack()
+    self.subscriber.subscribe(self.subscription_path, callback=callback)
     return
 
   # Returns the number of VIEW action seen
   def get_view_count(self):
-    return -1
+    return self.view_count
 
   # Returns true if action is a VIEW action.
   def is_view_action(self, action):
