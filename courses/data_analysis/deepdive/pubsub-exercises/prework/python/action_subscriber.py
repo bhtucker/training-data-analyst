@@ -31,7 +31,7 @@ class ActionSubscriber:
     self.view_count = 0
 
     def callback(message):
-      action = ActionUtils.decode_action_from_json(message)
+      action = ActionUtils.decode_action_from_json(message.data)
       if self.is_view_action(action):
         self.view_count += 1
       message.ack()
